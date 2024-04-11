@@ -4,8 +4,9 @@
 #include <atomic>
 #include "pp_buf.hh"
 #include <mutex>
+#include <unistd.h>
 
-std::mutex myMutex;
+std::mutex theMutex;
 
 void rx(int16_t data[], size_t sz, buf &buffer ) {
     std::vector<int16_t> v(data, data + sz);
@@ -29,35 +30,57 @@ int16_t *gen_data(size_t sz) {
 }
 
 // Will generate data and swap buffers if they are free
-void data_reader(std::vector<buf> buffers, size_t buff_sz) {
+void data_reader(std::vector<buf> &buffers, size_t buff_sz) {
+    std::cout << "Starting reader thread...." << std::endl;
     int16_t *data = gen_data(buff_sz);
-    
-    //std::lock_guard<std::mutex> guard(myMutex);
-    if (buffers[0].ready)
+
+    if (buffers[0].empty)
         rx(data, buff_sz, buffers[0]);
+    // else if (buffers[1].empty)
+    //     rx(data, buff_sz, buffers[1]);
     else
-        rx(data, buff_sz, buffers[1]);
+        printf("both buffers are full, wait until any is empty...\n");
+    
+    //std::lock_guard<std::mutex> lock(theMutex);
+    
+    delete []data;
 }
 
-void data_display(std::vector<buf> buffers, size_t buff_sz) {
-    if (buffers[1].busy && buffers[0].ready)
-        tx(buffer[0]);
-    else if()
-        tx(buffer[1]);
+void data_display(std::vector<buf> &buffers, size_t buff_sz) {
+    std::cout << "Starting display thread...." << std::endl;
+    //
+    for (int i = 0; i < 10; i++) {
+    std::cout << "from display buffers empty: " << i <<" "<<buffers[0].empty   << std::endl;
+        if (!buffers[0].empty) {
+            //std::lock_guard<std::mutex> lock(theMutex);
+            tx(buffers[0]);
+        }
+
+        // if (!buffers[1].empty) {
+        //     std::lock_guard<std::mutex> lock(theMutex);
+        //     tx(buffers[1]);
+        // }
+    }
 }
 
 
 int main () {
 
-    size_t buf_sz = 40;
+    size_t buf_sz = 10;
     int num_buffers = 2;
     std::vector<buf> buffers(num_buffers);
-
-
-
+    
+  
     
 
-    delete []data;
+    std::thread display(&data_display, std::ref(buffers), buf_sz);
+    std::thread processing(&data_reader, std::ref(buffers),buf_sz);
+
+    processing.join();
+    display.join();
+
+
+
 
     
     return 0;
