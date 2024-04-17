@@ -43,14 +43,13 @@ include_directories(${CMAKE_INCLUDE_PATH})
 # Libraries
 #=================================================================
 
-add_executable(ppong
-  ${CMAKE_SOURCE_DIR}/pp_buf.cpp 
+add_executable(pp 
+  ${CMAKE_SOURCE_DIR}/pp.cpp 
+  #${CMAKE_SOURCE_DIR}/pp_buf_sem.cpp 
+  #${CMAKE_SOURCE_DIR}/pp_buf_atom.cpp 
+  
+  
   )
 
-target_link_libraries(ppong pthread) 
-#                           ${JSONCPP_LIBRARIES} 
-#                           ${CURL_LIBRARIES}
-#                           Boost::program_options 
-#                           ${zmq_libs}
-#                           fftw3f
-#                           )
+target_link_libraries(pp pthread) 
+

@@ -7,9 +7,12 @@ private:
     int id;
     size_t buf_sz;
     
+    
     std::vector<int16_t> dat;
 public:
     bool empty;
+    bool read_first;
+
     buf(int sz);
     buf();
     ~buf();
@@ -29,6 +32,7 @@ buf::buf(int sz) {
     id = total;
     buf_sz = sz;
     empty = true;
+    read_first = true;
     dat.reserve(sz);
 }
 
@@ -37,6 +41,8 @@ buf::buf(){
     total++;
     id = total;
     empty = true;
+    if (id == 1) read_first = true;
+    else read_first = false;
 }
 buf::~buf(){
     total--;
